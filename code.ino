@@ -31,7 +31,7 @@ void setup() {
   pinMode(lmb, OUTPUT);
   pinMode(rmf, OUTPUT);
   pinMode(rmb, OUTPUT);
-
+  
   //button pin as input
   pinMode(button1, INPUT_PULLUP);
   pinMode(button2, INPUT_PULLUP);
@@ -40,9 +40,7 @@ void setup() {
   Serial.begin(9600);
 }
 
-
 void loop() {
-
   button_status();  //sensor_reading the status of push button
 
   //push button1 function : the car will start following the line
@@ -69,7 +67,6 @@ void loop() {
   //push button4 function : to check the analog values
   while (button4_state != 1) {
     (button3_state = digitalRead(button3) != 1) ? button3_state = 0, button4_state = 1 : button4_state = 0;
-
     show_analog_value();
   }
 }
@@ -81,8 +78,8 @@ void sensor_reading() {
   // Loop to read values from the 5 channel IR sensor array connected to A3 to A7
   for (int i = 0; i < 5; i++) {
     sensor[i] = analogRead(A3 + i);  // Read analog values from A3 to A7
-    /* Threshold logic: 
-       If the sensor value is above the threshold, set it to 1 (indicating line detected),
+    
+    /* Threshold logic: If the sensor value is above the threshold, set it to 1 (indicating line detected),
        else set it to 0 */
     if (sensor[i] > threshold) {
       sensor[i] = 1;
@@ -110,12 +107,11 @@ void Line_Follow() {
       current_error = 2.0 - c;  // The ideal position is in the middle (sensor[2] and sensor[3])
       PID_value = current_error * kp + kd * (current_error - previous_error);
       previous_error = current_error;
-
       right_motor = right_motor_speed - PID_value;
       left_motor = left_motor_speed + PID_value;
       motor(left_motor, right_motor);  // Set motor speeds to follow the line
     }
-
+    
     // All sensors on white surface (no line detected)
     if (sensor[0] == 0 && sensor[1] == 0 && sensor[2] == 0 && sensor[3] == 0 && sensor[4] == 0) {
       if (t == 'r') right();  // Turn right if the 'r' flag is set
@@ -131,14 +127,16 @@ void Line_Follow() {
     if (sensor[4] == 1 && sensor[0] == 0)
        t = 'l';
 
-    // All sensors on black surface (line detected on all sensors)
+    // All sensors on the black surface (line detected on all sensors)
     if (sensor[0] == 1 && sensor[1] == 1 && sensor[2] == 1 && sensor[3] == 1 && sensor[4] == 1) {
-      delay(30);  // Small delay to stabilize sensor readings
-      sensor_reading();  // Re-read sensor values
+      delay(30);  // Small delay to stabilize the sensor readings
+      sensor_reading();  // Re-read the sensor values
       if ((sensor[0] + sensor[1] + sensor[2] + sensor[3] + sensor[4]) == 5) {
         motor(0, 0);  // Stop the robot if all sensors detect the line
         while ((sensor[0] + sensor[1] + sensor[2] + sensor[3] + sensor[4]) == 5) sensor_reading();  // Wait until the robot is no longer over the line
-      } else if ((sensor[0] + sensor[1] + sensor[2] + sensor[3] + sensor[4]) == 0) t = 'r';  // If no sensors detect the line, turn right
+      } 
+      else if ((sensor[0] + sensor[1] + sensor[2] + sensor[3] + sensor[4]) == 0)
+        t = 'r';  // If no sensor detects the line, turn right
     }
   }
 }
@@ -152,7 +150,6 @@ void right() {
     break;
   }
 }
-
 void left() {
   while (1) {
     motor(-turn_speed, turn_speed);
@@ -200,7 +197,6 @@ void motor(int a, int b) {
     digitalWrite(rmf, 0);
     digitalWrite(rmb, 1);
   }
-
   if (a > 250) a = 250;
   if (b > 250) b = 250;
 
@@ -208,15 +204,13 @@ void motor(int a, int b) {
   analogWrite(rms, b);
 }
 
-
 void show_analog_value() {
   // Loop through all the 5 sensors (A3, A4, A5, A6, A7)
   for (short int i = 0; i < 5; i++) {
-    // Read analog values from A3 to A7 and print them
-    Serial.print(String(analogRead(A3 + i)) + " ");
+    Serial.print(String(analogRead(A3 + i)) + " "); // Read analog values from A3 to A7 and print them
   }
   delay(100);  // Small delay to make the output readable
-  Serial.println();  // Move to the next line after printing all sensor values
+  Serial.println();  // Move to the next line after printing all the sensor values
 }
 
 
